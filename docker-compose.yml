@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./smartphone_ai.db
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - ollama
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+
+volumes:
+  ollama_data:
+
+networks:
+  default:
+    name: smartphone-ai-network
